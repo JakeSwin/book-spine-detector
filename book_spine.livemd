@@ -1,0 +1,61 @@
+<!-- livebook:{"file_entries":[{"file":{"file_system_id":"local","file_system_type":"local","path":"/home/swin/Downloads/IMG_0010.jpg"},"name":"IMG_0010.jpg","type":"file"}]} -->
+
+# Book Spine Detector
+
+```elixir
+Mix.install(
+  [
+    {:bumblebee, "~> 0.6.0"},
+    {:exla, ">= 0.0.0"},
+    {:nx, "~> 0.5"},
+    {:ortex, "~> 0.1.10"},
+    {:tokenizers, "~> 0.5.0"},
+    {:kino, "~> 0.15.0"},
+    {:evision, "~> 0.2"}
+  ],
+  config: [nx: [default_backend: EXLA.Backend]]
+)
+```
+
+## Section
+
+```elixir
+model = Ortex.load("./grounding-dino-tiny-ONNX/onnx/model_bnb4.onnx", [:cuda])
+```
+
+```elixir
+{:ok, tokenizer} = Tokenizers.Tokenizer.from_file("./grounding-dino-tiny-ONNX/tokenizer.json")
+```
+
+```elixir
+{:ok, encoding} = Tokenizers.Tokenizer.encode(tokenizer, "Book spines")
+```
+
+```elixir
+mat = Evision.imread("/home/swin/Downloads/books_crop.jpg")
+```
+
+```elixir
+mat_nx = 
+  Evision.Mat.to_nx(mat) 
+  |> Nx.as_type(:f32)
+  |> Nx.new_axis(0)
+  |> Nx.transpose(axes: [0, 3, 1, 2])
+  |> Nx.backend_transfer(EXLA.Backend)
+```
+
+```elixir
+tokens = 
+  Nx.tensor(Tokenizers.Encoding.get_ids(encoding)) 
+  |> Nx.as_type(:s64)
+  |> Nx.broadcast({1, 4})
+```
+
+```elixir
+{output} = Ortex.run(model, {
+  mat_nx, 
+  tokens,
+})
+```
+
+<!-- livebook:{"offset":1216,"stamp":{"token":"XCP.mQFf2kAD_NGbJhI-9fRveNQnFaX0rmR7ls_TabuVKn_meQVM2uYeCQvkDsm-8nYobWsTdhBPldjvkdSYtYpy76gJMFIiofOVZAqGZw","version":2}} -->

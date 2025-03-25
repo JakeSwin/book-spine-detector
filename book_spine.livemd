@@ -11,9 +11,10 @@ Mix.install(
     {:ortex, "~> 0.1.10"},
     {:tokenizers, "~> 0.5.0"},
     {:kino, "~> 0.15.0"},
-    {:evision, "~> 0.2"}
+    {:evision, "~> 0.2"},
+    {:torchx, "~> 0.5"}
   ],
-  config: [nx: [default_backend: EXLA.Backend]]
+  config: [nx: [default_backend: {Torchx.Backend, device: :cuda}]]
 )
 ```
 
@@ -32,7 +33,7 @@ model = Ortex.load("./grounding-dino-tiny-ONNX/onnx/model_bnb4.onnx", [:cuda])
 ```
 
 ```elixir
-mat = Evision.imread("/home/swin/Downloads/books_crop.jpg")
+mat = Evision.imread("./books_crop.jpg")
 ```
 
 ```elixir
@@ -41,7 +42,7 @@ mat_nx =
   |> Nx.as_type(:f32)
   |> Nx.new_axis(0)
   |> Nx.transpose(axes: [0, 3, 1, 2])
-  |> Nx.backend_transfer(EXLA.Backend)
+  |> Nx.backend_transfer(Torchx.Backend)
 ```
 
 ```elixir
@@ -58,4 +59,4 @@ tokens =
 })
 ```
 
-<!-- livebook:{"offset":1216,"stamp":{"token":"XCP.mQFf2kAD_NGbJhI-9fRveNQnFaX0rmR7ls_TabuVKn_meQVM2uYeCQvkDsm-8nYobWsTdhBPldjvkdSYtYpy76gJMFIiofOVZAqGZw","version":2}} -->
+<!-- livebook:{"offset":1243,"stamp":{"token":"XCP.-OdJBKtJMhdEEPhtigmeiueJPd0JhkjOClxhHS_bPK2qU0o2n9Lpu8uRbuhJ-YyOBVR750HjanbKQnX4ThLaOSCyn60YC1XNA7BV-Q","version":2}} -->
